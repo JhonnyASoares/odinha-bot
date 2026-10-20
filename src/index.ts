@@ -40,7 +40,27 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-client.login(config.DISCORD_TOKEN);
+// Função para tentar o login com repetição em caso de falha de rede
+const loginWithRetry = async (retries = 30, delay = 60000) => {
+  try {
+    await client.login(config.DISCORD_TOKEN);
+  } catch (error) {
+    if (retries > 0) {
+      console.warn(
+        `[Rede] Falha ao conectar ao Discord. Tentando novamente em ${delay / 1000}s... (Tentativas restantes: ${retries})`,
+      );
+      setTimeout(() => loginWithRetry(retries - 1, delay), delay);
+    } else {
+      console.error(
+        "[Rede] Número máximo de tentativas de login excedido. Verifique sua conexão.",
+        error,
+      );
+      process.exit(1); // Deixa o PM2 reiniciar se persistir após várias tentativas
+    }
+  }
+};
+
+loginWithRetry();
 
 /*
 client.on('messageCreate', (message) => {
