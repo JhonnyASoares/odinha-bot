@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -8,14 +9,15 @@ datasource db {
 }
 
 model Guild {
-  id        String @id
+  id            String @id
   name          String?
   rolls_channel String?
-  insults   Boolean @default(true)
+  insults       Boolean @default(true)
 
-  users User[]
-
-  sheetSets     RpgSheetSet[]
+  users            User[]
+  advancedSheetSet AdvancedSheetSet[]
+  sheetSets        RpgSheetSet[]
+  sheetMaps        SheetMap[]
 }
 
 model User {
@@ -28,19 +30,13 @@ model User {
 }
 
 model RpgSheetSet {
-
   name     String
-
   cell     String
-
   alias    String?
-
   dice     String?
-
   action  RpgSheetAction @default(get)
 
   guildId  String
-
   guild    Guild @relation(fields: [guildId],references: [id])
 
   @@id([name, guildId])
@@ -49,4 +45,33 @@ model RpgSheetSet {
 enum RpgSheetAction {
   get
   set
+}
+
+model SheetMap  {
+  name     String
+  cell     String
+  guildId  String
+  guild    Guild @relation(fields: [guildId],references: [id])
+  @@id([name, guildId])
+}
+
+model AdvancedSheetSet{
+  name      String
+  alias     String?
+  operation String
+
+  guildId  String
+  guild    Guild @relation(fields: [guildId],references: [id])
+
+  @@id([name, guildId])
+}
+
+view VSheetSet {
+  name      String
+  guildId   String
+  cell      String?
+  alias     String?
+  dice      String?
+  action    RpgSheetAction?
+  operation String?
 }

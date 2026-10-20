@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
 import { getOnly as getGuild } from "../models/guild";
-import { getOnly as getCommand } from "../models/rpg_sheet";
 import { getFicha } from "../models/user";
+import { getOnly as getCommand } from "../models/views/sheet_set";
 import { handleRolls } from "../services/dice.service";
 import { insult } from "../services/insult.service";
 import { getCellValue } from "../services/sheets.service";
@@ -27,6 +27,7 @@ export async function handleMessage(message: Message) {
       const diceTest = dicePrefixRegex.test(msg);
 
       if (message.content.startsWith(">")) {
+        console.log(message);
         rpgSets(message);
       }
 
@@ -55,13 +56,23 @@ async function rpgSets(message: Message) {
     const msgCont = message.content;
     //const command = msgCont.match(/^>(\S+)/)?.[1];
     const [, command, args] = msgCont.match(/^>(\S+)\s*(.*)?$/) ?? [];
+
+    console.log(command);
+    console.log(args);
     if (command) {
       const cmd = await getCommand(command, message.guildId!);
-      if (cmd) {
+      if (cmd?.operation) {
+        // fazer lógica de operação
+        // identificar os valores entre []
+        // itentificar os valores entre {}
+        // itentificar os velores entre ""
+      }
+
+      if (cmd?.cell) {
         const cell = await getCellValue(ficha, cmd.cell);
         if (!cell) {
           return await message.reply(
-            "❌ Nenhum valor encontrado, confira se a celula está correta",
+            `❌ Nenhum valor encontrado, confira se a celula "${cmd.cell}" está correta.`,
           );
         }
         const dice = cmd.dice ? `${cmd.dice} +` : "";
@@ -70,8 +81,6 @@ async function rpgSets(message: Message) {
         return await message.reply(handleRolls(msg));
       }
       return await message.reply("❌ Comando não registrado");
-    } else {
-      //await getAllCommands(message.guildId!);
     }
   } catch (error) {
     return `❌ Ocorreu um erro nos commands sets.\n\`\`\`${String(error)}\`\`\``;
