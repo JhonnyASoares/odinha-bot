@@ -41,7 +41,7 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 // Função para tentar o login com repetição em caso de falha de rede
-const loginWithRetry = async (retries = 30, delay = 60000) => {
+const loginWithRetry = async (retries = 60, delay = 60000) => {
   try {
     await client.login(config.DISCORD_TOKEN);
   } catch (error) {
