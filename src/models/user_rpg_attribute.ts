@@ -46,3 +46,27 @@ export async function updateOrCreate({
     throw new Error("Erro ao salvar atributo do usuário.");
   }
 }
+
+export async function getAllForUser(userId: string, guildId: string) {
+  try {
+    return await prisma.guildRpgAttribute.findMany({
+      where: {
+        guildId,
+      },
+      include: {
+        userAttributes: {
+          where: {
+            userId,
+          },
+          select: {
+            value: true,
+            bonus: true,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Erro ao buscar atributos do usuário.");
+  }
+}

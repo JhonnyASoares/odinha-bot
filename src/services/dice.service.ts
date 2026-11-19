@@ -43,6 +43,15 @@ export function handleRolls(msgContent: string) {
   }
 }
 
+export function handleSpellRoll(
+  alias: string,
+  effect: string | null,
+  form: string,
+) {
+  const effectMessage = effect ? `> ${effect}\n` : "";
+  return `**${alias}**\n${effectMessage}${handleRolls(form)}`;
+}
+
 function responseDice(message: string, matches: string[]) {
   try {
     let resultFinal = message;

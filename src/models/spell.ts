@@ -45,3 +45,19 @@ export async function updateOrCreate({
     throw new Error("Erro ao salvar magia.");
   }
 }
+
+export async function getOnly(command: string, guildId: string) {
+  try {
+    return await prisma.spell.findUnique({
+      where: {
+        command_guildId: {
+          command,
+          guildId,
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error("Erro ao buscar magia.");
+  }
+}
