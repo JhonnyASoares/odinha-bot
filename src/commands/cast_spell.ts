@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { evaluate } from "mathjs";
 import { getOnly as getSpell } from "../models/spell";
 import { getAllForUser } from "../models/user_rpg_attribute";
 import { handleSpellRoll } from "../services/dice.service";
@@ -12,6 +13,12 @@ export const data = new SlashCommandBuilder()
       .setDescription("Comando da magia cadastrada.")
       .setMaxLength(25)
       .setRequired(true),
+  )
+  .addStringOption((option) =>
+    option
+      .setName("extension")
+      .setDescription("Complemento matemático, por exemplo: + 10, * 1.5 ou / 2.")
+      .setMaxLength(50),
   );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -23,6 +30,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 
     const command = interaction.options.getString("spell", true);
+    const extension = interaction.options.getString("extension")?.trim() ?? "";
+
+    if (extension && !isValidExtension(extension)) {
+      return interaction.editReply(
+        "Extensão inválida. Use apenas operações matemáticas, como + 10, * 1.5 ou / 2.",
+      );
+    }
+
     const spell = await getSpell(command, interaction.guildId);
 
     if (!spell) {
@@ -64,6 +79,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       form = form.replace(pattern, String(value + bonus));
     }
 
+    if (extension) {
+      form = `(${form}) ${extension}`;
+    }
+
     return interaction.editReply(
       handleSpellRoll(spell.alias, spell.effect, form),
     );
@@ -75,4 +94,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function isValidExtension(extension: string) {
+  if (!/^[+\-*/][\d+\-*/().\s]*$/.test(extension)) {
+    return false;
+  }
+
+  try {
+    return Number.isFinite(evaluate(`1 ${extension}`));
+  } catch {
+    return false;
+  }
 }
