@@ -15,9 +15,45 @@ model Guild {
   insults       Boolean @default(true)
 
   users            User[]
-  advancedSheetSet AdvancedSheetSet[]
   sheetSets        RpgSheetSet[]
   sheetMaps        SheetMap[]
+  spells           Spell[]
+  rpgAttributes    GuildRpgAttribute[]
+}
+
+model Spell {
+  id      Int     @id @default(autoincrement())
+  command String  @db.VarChar(25)
+  alias   String  @db.VarChar(50)
+  effect  String? @db.VarChar(50)
+  form    String  @db.VarChar(100)
+  extra   String? @db.VarChar(50)
+  guildId String  @db.VarChar(191)
+  guild   Guild   @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@unique([command, guildId])
+  @@map("Spells")
+}
+
+model GuildRpgAttribute {
+  id              Int                @id @default(autoincrement())
+  name            String             @db.VarChar(25)
+  guildId         String             @db.VarChar(191)
+  guild           Guild              @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  userAttributes  UserRpgAttribute[]
+
+  @@unique([name, guildId])
+}
+
+model UserRpgAttribute {
+  id          Int               @id @default(autoincrement())
+  userId      String            @db.VarChar(191)
+  value       String            @db.VarChar(15)
+  bonus       String?           @db.VarChar(15)
+  attributeId Int
+  attribute   GuildRpgAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, attributeId])
 }
 
 model User {
@@ -52,17 +88,6 @@ model SheetMap  {
   cell     String
   guildId  String
   guild    Guild @relation(fields: [guildId],references: [id])
-  @@id([name, guildId])
-}
-
-model AdvancedSheetSet{
-  name      String
-  alias     String?
-  operation String
-
-  guildId  String
-  guild    Guild @relation(fields: [guildId],references: [id])
-
   @@id([name, guildId])
 }
 

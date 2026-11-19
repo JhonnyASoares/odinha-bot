@@ -1,4 +1,6 @@
-import * as adv_sets from "./adv_sets";
+import * as add_rpg_attribute from "./add_rpg_attribute";
+import * as add_spell from "./add_spell";
+import * as add_user_attribute from "./add_user_attribute";
 import * as avatar from "./avatar";
 import * as ping from "./ping";
 import * as register_sheet from "./register_sheet";
@@ -7,7 +9,9 @@ import * as server_settings from "./server_settings";
 import * as sheet_map from "./sheet_map";
 
 export const commands = {
-  adv_sets,
+  add_rpg_attribute,
+  add_spell,
+  add_user_attribute,
   avatar,
   ping,
   register_sheet,
