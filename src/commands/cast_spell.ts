@@ -49,6 +49,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       interaction.guildId,
     );
     let form = spell.form;
+    let extra = spell.extra ?? "";
 
     for (const attribute of attributes) {
       const attributePattern = escapeRegExp(attribute.name);
@@ -57,7 +58,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         "giu",
       );
 
-      if (!pattern.test(form)) {
+      const hasAttributeInForm = pattern.test(form);
+      pattern.lastIndex = 0;
+      const hasAttributeInExtra = pattern.test(extra);
+      pattern.lastIndex = 0;
+
+      if (!hasAttributeInForm && !hasAttributeInExtra) {
         continue;
       }
 
@@ -77,10 +83,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       }
 
       form = form.replace(pattern, String(value + bonus));
+      extra = extra.replace(pattern, String(value + bonus));
     }
 
     if (extension) {
       form = `(${form}) ${extension}`;
+    }
+
+    if (extra) {
+      form = `(${form}) + (${extra})`;
     }
 
     return interaction.editReply(
